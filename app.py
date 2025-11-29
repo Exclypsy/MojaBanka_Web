@@ -15,7 +15,7 @@ def hello_world():  # put application's code here
 
 @app.route('/fnfn/')
 def AhojSvet():  # put application's code here
-    return 'Ahoj svet!!!'
+    return 'Helou world :)'
 
 
 if __name__ == '__main__':
