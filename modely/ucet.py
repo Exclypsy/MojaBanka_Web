@@ -59,6 +59,61 @@ class Ucet:
         cursor.close()
         conn.close()
 
+    def vklad(self, suma):
+        if suma <= 0:
+            raise ValueError("Suma vkladu musi byt kladna.")
+
+        self.zostatok += suma
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
+        cursor.execute(sql, (self.zostatok, self.cislo_uctu))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def vyber(self, suma, je_majitel=True, je_dominsu=False):
+        if suma <= 0:
+            raise ValueError("Suma vyberu musi byt kladna.")
+
+        if not je_majitel:
+            raise PermissionError("Vyber moze robit iba majitel uctu.")
+
+        if not je_dominsu:
+            if self.zostatok < suma:
+                raise ValueError("Nedostatok prostriedkov na ucte.")
+        else:
+            max_mozne = self.zostatok + (self.limit_precerpania or 0)
+            if suma > max_mozne:
+                raise ValueError("Prekroceny limit precerpania.")
+
+        self.zostatok -= suma
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
+        cursor.execute(sql, (self.zostatok, self.cislo_uctu))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def zapocitaj_urok(self):
+        if self.zostatok >= 0:
+            self.zostatok = self.zostatok * (1 + self.urok / 100.0)
+        else:
+            if self.urok_v_minuse is None:
+                raise ValueError("Pre minusovy ucet chyba urok_v_minuse.")
+            self.zostatok = self.zostatok * (1 + self.urok_v_minuse / 100.0)
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
+        cursor.execute(sql, (self.zostatok, self.cislo_uctu))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
     @staticmethod
     def nacitaj_podla_cisla(cislo_uctu):
         conn = get_connection()

@@ -9,8 +9,8 @@ def main():
 
     u = Ucet(
         id_majitela=k.id,
-        zostatok=100.0,
-        urok=1.5,
+        zostatok=200.0,
+        urok=1.7,
         typ="BEZNE"
     )
     u.uloz_do_db()
