@@ -1,20 +1,36 @@
 from modely.ucet import Ucet
 
 def main():
+    global input
     u = Ucet.nacitaj_podla_cisla(1)
 
-    print("Povodny zostatok:", u.zostatok)
-    u.vklad(50)
-    print("Po vklade:", u.zostatok)
+    while True:
+        print("Moznosti operacii:\n"
+              "[1] - vklad\n"
+              "[2] - vyber\n"
+              "[3] - EXIT")
 
-    try:
-        u.vyber(30, je_majitel=True)
-        print("Po vybere:", u.zostatok)
-    except Exception as e:
-        print("Chyba pri vybere:", e)
+        vstup = int(input("Zadajte moznost: "))
 
-    u.zapocitaj_urok()
-    print("Po zapocitani uroku:", u.zostatok)
+        if vstup == 1:
+            try:
+                suma = float(input("Zadaj sumu vkladu: "))
+                u.vklad(suma)
+                print("Vklad prebehol, novy zostatok:", u.zostatok)
+            except ValueError as e:
+                print("Chyba pri vklade:", e)
+        elif vstup == 2:
+            try:
+                suma = float(input("Zadaj sumu vyberu: "))
+                u.vyber(suma, je_majitel=True)
+                print("Vyber prebehol, novy zostatok:", u.zostatok)
+            except (ValueError, PermissionError) as e:
+                print("Chyba pri vybere:", e)
+        elif vstup == 3:
+            print("bye bye")
+            break
+        else:
+            print("Zadana nespravna moznost")
 
 if __name__ == "__main__":
     main()
