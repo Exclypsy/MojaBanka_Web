@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from databaza.db import get_connection
 from modely.klient import Klient
 from modely.ucet import Ucet
 
@@ -86,6 +87,89 @@ def registrovat_klienta():
 
     return render_template("registrovat_klienta.html",
                            chyba=chyba, sprava=sprava)
+
+@app.route("/vytvor_ucet", methods=["GET", "POST"])
+def vytvor_ucet_web():
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    chyba = None
+    sprava = None
+
+    # zoznam klientov pre select
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id, meno, priezvisko, email FROM klient ORDER BY id")
+    klienti = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if request.method == "POST":
+        try:
+            id_majitela = int(request.form.get("id_majitela", "0"))
+            zostatok = float(request.form.get("zostatok", "0"))
+            urok = float(request.form.get("urok", "0"))
+            typ = request.form.get("typ", "BEZNE")
+            limit = request.form.get("limit_precerpania", "")
+            urok_m = request.form.get("urok_v_minuse", "")
+
+            limit_val = float(limit) if limit else None
+            urok_m_val = float(urok_m) if urok_m else None
+
+            u = Ucet(
+                id_majitela=id_majitela,
+                zostatok=zostatok,
+                urok=urok,
+                typ=typ,
+                limit_precerpania=limit_val,
+                urok_v_minuse=urok_m_val
+            )
+            u.uloz_do_db()
+            sprava = f"Účet vytvorený, číslo: {u.cislo_uctu}"
+        except Exception as e:
+            chyba = f"Chyba pri vytváraní účtu: {e}"
+
+    return render_template(
+        "vytvor_ucet.html",
+        chyba=chyba,
+        sprava=sprava,
+        klienti=klienti
+    )
+@app.route("/klienti")
+def klienti_prehlad():
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id, meno, priezvisko, email, rola FROM klient ORDER BY id")
+    klienti = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("klienti.html", klienti=klienti)
+
+
+@app.route("/ucty")
+def ucty_prehlad():
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT u.cislo_uctu, u.id_majitela, u.zostatok, u.urok, u.typ,
+               u.limit_precerpania, u.urok_v_minuse,
+               k.meno, k.priezvisko, k.email
+        FROM ucet u
+        JOIN klient k ON u.id_majitela = k.id
+        ORDER BY u.cislo_uctu
+    """)
+    ucty = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("ucty.html", ucty=ucty)
 
 if __name__ == "__main__":
     app.run(debug=True)

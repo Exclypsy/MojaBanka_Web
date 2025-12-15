@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Účty{% endblock %}
+{% block content %}
+<h1>Účty</h1>
+
+<table border="1" cellpadding="4">
+    <tr>
+        <th>Číslo účtu</th>
+        <th>Majiteľ (ID)</th>
+        <th>Majiteľ meno</th>
+        <th>Email</th>
+        <th>Typ</th>
+        <th>Zostatok</th>
+        <th>Úrok</th>
+        <th>Limit</th>
+        <th>Úrok v mínuse</th>
+    </tr>
+    {% for u in ucty %}
+    <tr>
+        <td>{{ u.cislo_uctu }}</td>
+        <td>{{ u.id_majitela }}</td>
+        <td>{{ u.meno }} {{ u.priezvisko }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.typ }}</td>
+        <td>{{ u.zostatok }}</td>
+        <td>{{ u.urok }}</td>
+        <td>{{ u.limit_precerpania }}</td>
+        <td>{{ u.urok_v_minuse }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

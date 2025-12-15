@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Vytvorenie účtu{% endblock %}
+{% block content %}
+<h1>Vytvorenie účtu (Formulár B)</h1>
+
+{% if chyba %}
+    <p style="color:red;">{{ chyba }}</p>
+{% endif %}
+{% if sprava %}
+    <p style="color:green;">{{ sprava }}</p>
+{% endif %}
+
+<form method="post">
+    <label>Majiteľ (klient):
+        <select name="id_majitela" required>
+            {% for k in klienti %}
+                <option value="{{ k.id }}">
+                    {{ k.id }} - {{ k.meno }} {{ k.priezvisko }} ({{ k.email }})
+                </option>
+            {% endfor %}
+        </select>
+    </label><br>
+
+    <label>Počiatočný zostatok:
+        <input type="number" step="0.01" name="zostatok" value="0" required>
+    </label><br>
+
+    <label>Úrok (%):
+        <input type="number" step="0.01" name="urok" value="1.0" required>
+    </label><br>
+
+    <label>Typ účtu:
+        <select name="typ" id="typ-uctu">
+            <option value="BEZNE">Bežné</option>
+            <option value="DOMINUSU">Do mínusu</option>
+        </select>
+    </label><br>
+
+    <label>Limit prečerpania:
+        <input type="number" step="0.01" name="limit_precerpania">
+    </label><br>
+
+    <label>Úrok v mínuse (%):
+        <input type="number" step="0.01" name="urok_v_minuse">
+    </label><br>
+
+    <button type="submit">Vytvoriť účet</button>
+</form>
+{% endblock %}

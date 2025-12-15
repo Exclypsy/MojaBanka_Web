@@ -7,8 +7,11 @@
 {% if rola == "OPERATOR" %}
     <ul>
         <li><a href="{{ url_for('registrovat_klienta') }}">Registrácia klienta</a></li>
+        <li><a href="{{ url_for('vytvor_ucet_web') }}">Vytvorenie účtu</a></li>
+        <li><a href="{{ url_for('klienti_prehlad') }}">Zobraziť všetkých klientov</a></li>
+        <li><a href="{{ url_for('ucty_prehlad') }}">Zobraziť všetky účty</a></li>
     </ul>
 {% else %}
-    <p>Si majiteľ – neskôr tu budú tvoje účty a operácie.</p>
+    <p>Si majiteľ – v ďalšom kroku pridáme tvoje účty a operácie (vklad, výber).</p>
 {% endif %}
 {% endblock %}
