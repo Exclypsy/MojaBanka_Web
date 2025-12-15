@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Prihlásenie{% endblock %}
+{% block content %}
+<h1>Prihlásenie</h1>
+{% if chyba %}
+    <p style="color:red;">{{ chyba }}</p>
+{% endif %}
+<form method="post">
+    <label>Email:
+        <input type="email" name="email" required>
+    </label><br>
+    <label>Heslo:
+        <input type="password" name="heslo" required>
+    </label><br>
+    <button type="submit">Prihlásiť</button>
+</form>
+{% endblock %}

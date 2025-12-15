@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="sk">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}MojaBanka{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Domov</a>
+        {% if session.get('klient_id') %}
+            <span>Prihlásený: {{ session.get('klient_meno') }} ({{ session.get('klient_rola') }})</span>
+            <a href="{{ url_for('logout') }}">Odhlásiť</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Prihlásiť</a>
+        {% endif %}
+    </nav>
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>

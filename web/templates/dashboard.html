@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Prehľad{% endblock %}
+{% block content %}
+<h1>Prehľad</h1>
+<p>Ahoj {{ meno }}, tvoja rola je {{ rola }}.</p>
+
+{% if rola == "OPERATOR" %}
+    <p>Si operátor – v ďalšom kroku sem pridáme odkazy na:
+        vytvorenie klienta, účtu, zobrazenie všetkých klientov a účtov.</p>
+{% else %}
+    <p>Si majiteľ – v ďalšom kroku sem pridáme zobrazenie tvojich účtov a operácie.</p>
+{% endif %}
+{% endblock %}
