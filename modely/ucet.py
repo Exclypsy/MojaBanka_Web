@@ -74,6 +74,10 @@ class Ucet:
         conn.close()
 
     def vyber(self, suma, je_majitel=True, je_dominsu=False):
+        suma = float(suma)
+        self.zostatok = float(self.zostatok)
+        if self.limit_precerpania is not None:
+            self.limit_precerpania = float(self.limit_precerpania)
         if suma <= 0:
             raise ValueError("Suma vyberu musi byt kladna.")
 
@@ -84,7 +88,7 @@ class Ucet:
             if self.zostatok < suma:
                 raise ValueError("Nedostatok prostriedkov na ucte.")
         else:
-            max_mozne = self.zostatok + (self.limit_precerpania or 0)
+            max_mozne = float(self.zostatok) + float(self.limit_precerpania or 0)
             if suma > max_mozne:
                 raise ValueError("Prekroceny limit precerpania.")
 

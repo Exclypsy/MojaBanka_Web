@@ -12,6 +12,8 @@
         <li><a href="{{ url_for('ucty_prehlad') }}">Zobraziť všetky účty</a></li>
     </ul>
 {% else %}
-    <p>Si majiteľ – v ďalšom kroku pridáme tvoje účty a operácie (vklad, výber).</p>
+    <ul>
+        <li><a href="{{ url_for('moje_ucty') }}">Moje účty</a></li>
+    </ul>
 {% endif %}
 {% endblock %}

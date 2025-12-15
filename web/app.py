@@ -171,5 +171,78 @@ def ucty_prehlad():
 
     return render_template("ucty.html", ucty=ucty)
 
+@app.route("/moje_ucty")
+def moje_ucty():
+    if not vyzaduje_prihlasenie():
+        return redirect(url_for("login"))
+
+    klient_id = session.get("klient_id")
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT cislo_uctu, zostatok, urok, typ,
+               limit_precerpania, urok_v_minuse
+        FROM ucet
+        WHERE id_majitela = %s
+        ORDER BY cislo_uctu
+    """, (klient_id,))
+    ucty = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("moje_ucty.html", ucty=ucty)
+
+@app.route("/ucet/<int:cislo_uctu>", methods=["GET", "POST"])
+def detail_uctu(cislo_uctu):
+    if not vyzaduje_prihlasenie():
+        return redirect(url_for("login"))
+
+    klient_id = session.get("klient_id")
+    rola = session.get("klient_rola")
+
+    u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+    if u is None:
+        return "Účet neexistuje.", 404
+
+    # kontrola prístupu:
+    # - majiteľ môže len svoje účty
+    # - operátor môže všetky
+    if rola != "OPERATOR" and u.id_majitela != klient_id:
+        return "Nemáš právo vidieť tento účet.", 403
+
+    chyba = None
+    sprava = None
+
+    if request.method == "POST":
+        akcia = request.form.get("akcia")
+
+        try:
+            if akcia == "vklad":
+                suma = float(request.form.get("suma", "0"))
+                u.vklad(suma)
+                sprava = "Vklad bol úspešný."
+            elif akcia == "vyber":
+                suma = float(request.form.get("suma", "0"))
+                je_dominsu = (u.typ == "DOMINUSU")
+                u.vyber(suma, je_majitel=(rola != "OPERATOR"), je_dominsu=je_dominsu)
+                sprava = "Výber bol úspešný."
+            elif akcia == "urok":
+                u.zapocitaj_urok()
+                sprava = "Úrok bol započítaný."
+        except Exception as e:
+            chyba = str(e)
+
+        # načítaj z DB znovu, aby sa zobrazil aktuálny zostatok
+        u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+
+    return render_template(
+        "detail_uctu.html",
+        u=u,
+        rola=rola,
+        chyba=chyba,
+        sprava=sprava
+    )
+
 if __name__ == "__main__":
     app.run(debug=True)

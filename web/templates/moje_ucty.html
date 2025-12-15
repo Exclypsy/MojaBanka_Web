@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Moje účty{% endblock %}
+{% block content %}
+<h1>Moje účty</h1>
+
+{% if not ucty %}
+    <p>Nemáš žiadne účty.</p>
+{% else %}
+<table border="1" cellpadding="4">
+    <tr>
+        <th>Číslo účtu</th>
+        <th>Typ</th>
+        <th>Zostatok</th>
+        <th>Úrok</th>
+        <th>Akcie</th>
+    </tr>
+    {% for u in ucty %}
+    <tr>
+        <td>{{ u.cislo_uctu }}</td>
+        <td>{{ u.typ }}</td>
+        <td>{{ u.zostatok }}</td>
+        <td>{{ u.urok }}</td>
+        <td>
+            <a href="{{ url_for('detail_uctu', cislo_uctu=u.cislo_uctu) }}">Detail / operácie</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}
