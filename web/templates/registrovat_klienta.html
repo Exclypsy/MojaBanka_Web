@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Registrácia klienta{% endblock %}
+{% block content %}
+<h1>Registrácia klienta</h1>
+
+{% if chyba %}
+    <p style="color:red;">{{ chyba }}</p>
+{% endif %}
+{% if sprava %}
+    <p style="color:green;">{{ sprava }}</p>
+{% endif %}
+
+<form method="post">
+    <label>Meno:
+        <input type="text" name="meno" required>
+    </label><br>
+    <label>Priezvisko:
+        <input type="text" name="priezvisko" required>
+    </label><br>
+    <label>Email:
+        <input type="email" name="email" required>
+    </label><br>
+    <label>Heslo:
+        <input type="password" name="heslo" required>
+    </label><br>
+    <label>Rola:
+        <select name="rola">
+            <option value="MAJITEL">Majiteľ</option>
+            <option value="OPERATOR">Operátor</option>
+        </select>
+    </label><br>
+    <button type="submit">Vytvoriť klienta</button>
+</form>
+{% endblock %}
