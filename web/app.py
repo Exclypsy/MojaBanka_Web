@@ -96,7 +96,6 @@ def vytvor_ucet_web():
     chyba = None
     sprava = None
 
-    # zoznam klientov pre select
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT id, meno, priezvisko, email FROM klient ORDER BY id")
@@ -205,9 +204,6 @@ def detail_uctu(cislo_uctu):
     if u is None:
         return "Účet neexistuje.", 404
 
-    # kontrola prístupu:
-    # - majiteľ môže len svoje účty
-    # - operátor môže všetky
     if rola != "OPERATOR" and u.id_majitela != klient_id:
         return "Nemáš právo vidieť tento účet.", 403
 
@@ -233,7 +229,6 @@ def detail_uctu(cislo_uctu):
         except Exception as e:
             chyba = str(e)
 
-        # načítaj z DB znovu, aby sa zobrazil aktuálny zostatok
         u = Ucet.nacitaj_podla_cisla(cislo_uctu)
 
     return render_template(
@@ -243,6 +238,27 @@ def detail_uctu(cislo_uctu):
         chyba=chyba,
         sprava=sprava
     )
+
+@app.route("/verejny_vklad", methods=["GET", "POST"])
+def verejny_vklad():
+    chyba = None
+    sprava = None
+
+    if request.method == "POST":
+        try:
+            cislo_uctu = int(request.form.get("cislo_uctu", "0"))
+            suma = float(request.form.get("suma", "0"))
+
+            u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+            if u is None:
+                chyba = "Účet s týmto číslom neexistuje."
+            else:
+                u.vklad(suma)
+                sprava = f"Vklad bol úspešný. Nový zostatok: {u.zostatok}"
+        except Exception as e:
+            chyba = f"Chyba pri vklade: {e}"
+
+    return render_template("verejny_vklad.html", chyba=chyba, sprava=sprava)
 
 if __name__ == "__main__":
     app.run(debug=True)

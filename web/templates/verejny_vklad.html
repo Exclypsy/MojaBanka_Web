@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Verejný vklad{% endblock %}
+{% block content %}
+<h1>Verejný vklad na účet</h1>
+<p>Tu môže hocikto vložiť peniaze na zadaný účet (bez prihlásenia).</p>
+
+{% if chyba %}
+    <p style="color:red;">{{ chyba }}</p>
+{% endif %}
+{% if sprava %}
+    <p style="color:green;">{{ sprava }}</p>
+{% endif %}
+
+<form method="post">
+    <label>Číslo účtu:
+        <input type="number" name="cislo_uctu" required>
+    </label><br>
+    <label>Suma:
+        <input type="number" step="0.01" name="suma" required>
+    </label><br>
+    <button type="submit">Vložiť</button>
+</form>
+{% endblock %}
