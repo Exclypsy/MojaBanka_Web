@@ -23,28 +23,37 @@ def menu_operator(klient):
     while True:
         print("\n=== MENU OPERÁTOR ===")
         print("1 - Vytvor klienta")
-        print("2 - Vytvor ucet")
-        print("3 - Zobraz vsetky ucty")
-        print("4 - Vklad na ucet")
-        print("5 - Zaratat urok na ucte")
-        print("0 - Odhlasit")
+        print("2 - Vytvor účet")
+        print("3 - Zobraz všetkých klientov")
+        print("4 - Zobraz všetky účty")
+        print("5 - Vklad na účet")
+        print("6 - Zarátať úrok na účte")
+        print("7 - Zmazať klienta")
+        print("8 - Zmazať účet")
+        print("0 - Odhlásiť")
 
-        volba = input("Zadaj volbu: ")
+        volba = input("Zadaj voľbu: ")
 
         if volba == "1":
             vytvor_klienta()
         elif volba == "2":
             vytvor_ucet()
         elif volba == "3":
-            zobraz_vsetky_ucty()
+            zobraz_vsetkych_klientov()
         elif volba == "4":
-            vklad_na_ucet()
+            zobraz_vsetky_ucty()
         elif volba == "5":
+            vklad_na_ucet()
+        elif volba == "6":
             zarataj_urok()
+        elif volba == "7":
+            zmaz_klienta()
+        elif volba == "8":
+            zmaz_ucet()
         elif volba == "0":
             break
         else:
-            print("Neplatna volba.")
+            print("Neplatná voľba.")
 
 def menu_majitel(klient):
     while True:
@@ -119,6 +128,33 @@ def zobraz_vsetky_ucty():
     cursor.close()
     conn.close()
 
+def zobraz_vsetkych_klientov():
+    print("\n=== Všetci klienti ===")
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, meno, priezvisko, email, rola
+            FROM klient
+            ORDER BY id
+        """)
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("V databáze nie sú žiadni klienti.")
+        else:
+            for row in rows:
+                print(
+                    f"ID {row['id']}: {row['meno']} {row['priezvisko']}, "
+                    f"email {row['email']}, rola {row['rola']}"
+                )
+
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("Chyba pri zobrazovaní klientov:", e)
+
 def vklad_na_ucet():
     print("\n=== Vklad na ucet ===")
     try:
@@ -191,6 +227,72 @@ def vyber_moj_ucet(klient):
         print("Vyber ok, novy zostatok:", u.zostatok)
     except Exception as e:
         print("Chyba pri vybere:", e)
+
+def zmaz_klienta():
+    print("\n=== Zmazanie klienta ===")
+    try:
+        id_klienta = int(input("Zadaj ID klienta na zmazanie: "))
+
+        k = Klient.nacitaj_podla_id(id_klienta) if hasattr(Klient, "nacitaj_podla_id") else None
+        if k is None:
+            from databaza.db import get_connection
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM klient WHERE id = %s", (id_klienta,))
+            row = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            if row is None:
+                print("Klient s týmto ID neexistuje.")
+                return
+
+        potvrdenie = input("Naozaj zmazať klienta a jeho účty? (a/n): ").lower()
+        if potvrdenie != "a":
+            print("Zmazanie zrušené.")
+            return
+
+        from databaza.db import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM ucet WHERE id_majitela = %s", (id_klienta,))
+        cursor.execute("DELETE FROM klient WHERE id = %s", (id_klienta,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        print("Klient a jeho účty boli zmazané.")
+    except Exception as e:
+        print("Chyba pri mazaní klienta:", e)
+
+def zmaz_ucet():
+    print("\n=== Zmazanie účtu ===")
+    try:
+        cislo = int(input("Zadaj číslo účtu na zmazanie: "))
+
+        u = Ucet.nacitaj_podla_cisla(cislo)
+        if u is None:
+            print("Účet s týmto číslom neexistuje.")
+            return
+
+        potvrdenie = input(f"Naozaj zmazať účet {cislo}? (a/n): ").lower()
+        if potvrdenie != "a":
+            print("Zmazanie zrušené.")
+            return
+
+        from databaza.db import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM ucet WHERE cislo_uctu = %s", (cislo,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        print("Účet bol zmazaný.")
+    except Exception as e:
+        print("Chyba pri mazaní účtu:", e)
+
 
 def main():
     while True:
