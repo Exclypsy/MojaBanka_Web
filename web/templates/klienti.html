@@ -5,26 +5,39 @@
 
 <table border="1" cellpadding="4">
     <tr>
-    <th>ID</th>
-    <th>Meno</th>
-    <th>Email</th>
-    <th>Rola</th>
-    <th>Akcie</th>
-</tr>
-{% for k in klienti %}
-<tr>
-    <td>{{ k.id }}</td>
-    <td>{{ k.meno }} {{ k.priezvisko }}</td>
-    <td>{{ k.email }}</td>
-    <td>{{ k.rola }}</td>
-    <td>
-        <form method="post" action="{{ url_for('zmaz_klienta_web', id_klienta=k.id) }}"
-              onsubmit="return confirm('Naozaj zmazať klienta ID {{ k.id }} a jeho účty?');">
-            <button type="submit">Zmazať</button>
-        </form>
-    </td>
-</tr>
-{% endfor %}
-
+        <th>ID</th>
+        <th>Meno</th>
+        <th>Email</th>
+        <th>Rola</th>
+        <th>Účty</th>
+        <th>Akcie</th>
+    </tr>
+    {% for k in klienti %}
+    <tr>
+        <td>{{ k.id }}</td>
+        <td>{{ k.meno }} {{ k.priezvisko }}</td>
+        <td>{{ k.email }}</td>
+        <td>{{ k.rola }}</td>
+        <td>
+            {% if not k.ucty %}
+                žiadne účty
+            {% else %}
+                <ul>
+                {% for u in k.ucty %}
+                    <li>
+                        {{ u.cislo_uctu }} ({{ u.typ }}, zostatok {{ u.zostatok }})
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </td>
+        <td>
+            <form method="post" action="{{ url_for('zmaz_klienta_web', id_klienta=k.id) }}"
+                  onsubmit="return confirm('Naozaj zmazať klienta ID {{ k.id }} a jeho účty?');">
+                <button type="submit">Zmazať</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
 </table>
 {% endblock %}

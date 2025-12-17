@@ -149,13 +149,32 @@ def klienti_prehlad():
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+
+    # klienti
     cursor.execute("SELECT id, meno, priezvisko, email, rola FROM klient ORDER BY id")
     klienti = cursor.fetchall()
+
+    # účty
+    cursor.execute("""
+        SELECT cislo_uctu, id_majitela, zostatok, typ
+        FROM ucet
+        ORDER BY id_majitela, cislo_uctu
+    """)
+    ucty_rows = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
-    return render_template("klienti.html", klienti=klienti)
+    # priradiť účty ku klientom
+    ucty_podla_klienta = {}
+    for r in ucty_rows:
+        ucty_podla_klienta.setdefault(r["id_majitela"], []).append(r)
 
+    # doplniť zoznam účtov do každého klienta
+    for k in klienti:
+        k["ucty"] = ucty_podla_klienta.get(k["id"], [])
+
+    return render_template("klienti.html", klienti=klienti)
 
 @app.route("/ucty")
 def ucty_prehlad():
@@ -282,6 +301,14 @@ def transakcie_prehlad():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
+    cursor.execute("""
+        SELECT u.cislo_uctu, k.meno, k.priezvisko
+        FROM ucet u
+        JOIN klient k ON u.id_majitela = k.id
+        ORDER BY u.cislo_uctu
+    """)
+    ucty = cursor.fetchall()
+
     if cislo_uctu:
         cursor.execute("""
             SELECT t.id, t.cislo_uctu, t.typ_operacie, t.suma,
@@ -309,9 +336,12 @@ def transakcie_prehlad():
     cursor.close()
     conn.close()
 
-    return render_template("transakcie.html",
-                           transakcie=transakcie,
-                           cislo_uctu=cislo_uctu)
+    return render_template(
+        "transakcie.html",
+        transakcie=transakcie,
+        cislo_uctu=cislo_uctu,
+        ucty=ucty
+    )
 
 @app.route("/uroky_operator", methods=["GET", "POST"])
 def uroky_operator():
@@ -321,19 +351,43 @@ def uroky_operator():
     chyba = None
     sprava = None
 
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+                   SELECT u.cislo_uctu,
+                          u.zostatok,
+                          u.urok,
+                          u.typ,
+                          u.urok_v_minuse,
+                          k.meno,
+                          k.priezvisko
+                   FROM ucet u
+                            JOIN klient k ON u.id_majitela = k.id
+                   ORDER BY u.cislo_uctu
+                   """)
+    ucty = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    vybrany_ucet = ""
+
     if request.method == "POST":
         rezim = request.form.get("rezim", "jeden")
         try:
             if rezim == "jeden":
-                cislo_uctu = int(request.form.get("cislo_uctu", "0"))
-                u = Ucet.nacitaj_podla_cisla(cislo_uctu)
-                if u is None:
-                    chyba = "Účet s týmto číslom neexistuje."
+                vybrany_ucet = request.form.get("cislo_uctu", "").strip()
+                if not vybrany_ucet:
+                    chyba = "Musíš vybrať účet."
                 else:
-                    u.zapocitaj_urok()
-                    sprava = f"Úrok bol započítaný na účte {cislo_uctu}."
+                    cislo_uctu = int(vybrany_ucet)
+                    u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+                    if u is None:
+                        chyba = "Účet s týmto číslom neexistuje."
+                    else:
+                        u.zapocitaj_urok()
+                        sprava = f"Úrok bol započítaný na účte {cislo_uctu}."
             else:
-                # všetky účty
                 conn = get_connection()
                 cursor = conn.cursor()
                 cursor.execute("SELECT cislo_uctu FROM ucet")
@@ -351,9 +405,14 @@ def uroky_operator():
         except Exception as e:
             chyba = f"Chyba pri započítavaní úroku: {e}"
 
-    return render_template("uroky_operator.html",
-                           chyba=chyba,
-                           sprava=sprava)
+    return render_template(
+        "uroky_operator.html",
+        chyba=chyba,
+        sprava=sprava,
+        ucty=ucty,
+        vybrany_ucet=vybrany_ucet
+    )
+
 @app.route("/zmaz_ucet/<int:cislo_uctu>", methods=["POST"])
 def zmaz_ucet_web(cislo_uctu):
     if not vyzaduje_operatora():

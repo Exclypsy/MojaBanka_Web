@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Započítanie úrokov{% endblock %}
 {% block content %}
-<h1>Započítanie úrokov (operátor)</h1>
+<h1>Započítanie úrokov</h1>
 
 {% if chyba %}
     <p style="color:red;">{{ chyba }}</p>
@@ -16,8 +16,20 @@
             <input type="radio" name="rezim" value="jeden" checked>
             Započítať úrok na jednom účte
         </label><br>
-        <label>Číslo účtu:
-            <input type="number" name="cislo_uctu">
+
+        <label>Účet:
+            <select name="cislo_uctu">
+                <option value="">– vyber účet –</option>
+                {% for u in ucty %}
+                    <option value="{{ u.cislo_uctu }}"
+                        {% if vybrany_ucet and vybrany_ucet|int == u.cislo_uctu %}selected{% endif %}>
+                        {{ u.cislo_uctu }} – {{ u.meno }} {{ u.priezvisko }}
+                        (zostatok {{ u.zostatok }}, úrok {{ u.urok }}%
+                        {% if u.typ == 'DOMINUSU' %}, úrok v mínuse {{ u.urok_v_minuse }}%{% endif %})
+                    </option>
+                {% endfor %}
+            </select>
+
         </label>
     </p>
 

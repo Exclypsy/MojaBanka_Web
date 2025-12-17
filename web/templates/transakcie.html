@@ -4,11 +4,20 @@
 <h1>Transakcie</h1>
 
 <form method="get">
-    <label>Filtrovať podľa čísla účtu:
-        <input type="number" name="cislo_uctu" value="{{ cislo_uctu }}">
+    <label>Filtrovať podľa účtu:
+        <select name="cislo_uctu">
+            <option value="">– všetky účty –</option>
+            {% for u in ucty %}
+                <option value="{{ u.cislo_uctu }}"
+                    {% if cislo_uctu and cislo_uctu|int == u.cislo_uctu %}selected{% endif %}>
+                    {{ u.cislo_uctu }} – {{ u.meno }} {{ u.priezvisko }}
+                </option>
+            {% endfor %}
+        </select>
     </label>
     <button type="submit">Filtrovať</button>
 </form>
+
 
 {% if not transakcie %}
     <p>Žiadne transakcie.</p>
