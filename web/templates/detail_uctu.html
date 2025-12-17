@@ -27,12 +27,13 @@
     </label><br>
 
     {% if rola == "OPERATOR" %}
+        <!-- Operátor: vklad + úrok -->
         <button type="submit" name="akcia" value="vklad">Vklad</button>
         <button type="submit" name="akcia" value="urok">Započítať úrok</button>
     {% else %}
+        <!-- Majiteľ: vklad + výber, bez úroku -->
         <button type="submit" name="akcia" value="vklad">Vklad</button>
         <button type="submit" name="akcia" value="vyber">Výber</button>
-        <button type="submit" name="akcia" value="urok">Započítať úrok</button>
     {% endif %}
 </form>
 

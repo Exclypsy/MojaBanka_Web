@@ -98,11 +98,11 @@ class Ucet:
         conn = get_connection()
         cursor = conn.cursor()
         sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
-        self._zaloguj_operaciu("VYBER", suma)
         cursor.execute(sql, (self.zostatok, self.cislo_uctu))
         conn.commit()
         cursor.close()
         conn.close()
+        self._zaloguj_operaciu("VYBER", suma)
 
     def zapocitaj_urok(self):
         stary = float(self.zostatok)

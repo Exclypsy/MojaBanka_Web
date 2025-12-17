@@ -26,7 +26,14 @@
         <td>{{ u.urok }}</td>
         <td>{{ u.limit_precerpania }}</td>
         <td>{{ u.urok_v_minuse }}</td>
+        <td>
+            <form method="post" action="{{ url_for('zmaz_ucet_web', cislo_uctu=u.cislo_uctu) }}"
+                  onsubmit="return confirm('Naozaj zmazať účet {{ u.cislo_uctu }}?');">
+                <button type="submit">Zmazať</button>
+            </form>
+        </td>
     </tr>
     {% endfor %}
+
 </table>
 {% endblock %}

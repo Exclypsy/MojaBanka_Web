@@ -36,3 +36,4 @@ class UcetDoMinusu(Ucet):
         conn.commit()
         cursor.close()
         conn.close()
+        self._zaloguj_operaciu("VYBER", float(suma))

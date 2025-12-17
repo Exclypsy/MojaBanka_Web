@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Transakcie{% endblock %}
+{% block content %}
+<h1>Transakcie</h1>
+
+<form method="get">
+    <label>Filtrovať podľa čísla účtu:
+        <input type="number" name="cislo_uctu" value="{{ cislo_uctu }}">
+    </label>
+    <button type="submit">Filtrovať</button>
+</form>
+
+{% if not transakcie %}
+    <p>Žiadne transakcie.</p>
+{% else %}
+<table border="1" cellpadding="4">
+    <tr>
+        <th>ID</th>
+        <th>Číslo účtu</th>
+        <th>Majiteľ</th>
+        <th>Typ operácie</th>
+        <th>Suma</th>
+        <th>Dátum a čas</th>
+    </tr>
+    {% for t in transakcie %}
+    <tr>
+        <td>{{ t.id }}</td>
+        <td>{{ t.cislo_uctu }}</td>
+        <td>{{ t.meno }} {{ t.priezvisko }}</td>
+        <td>{{ t.typ_operacie }}</td>
+        <td>{{ t.suma }}</td>
+        <td>{{ t.datum_cas }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

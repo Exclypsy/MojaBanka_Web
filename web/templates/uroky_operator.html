@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Započítanie úrokov{% endblock %}
+{% block content %}
+<h1>Započítanie úrokov (operátor)</h1>
+
+{% if chyba %}
+    <p style="color:red;">{{ chyba }}</p>
+{% endif %}
+{% if sprava %}
+    <p style="color:green;">{{ sprava }}</p>
+{% endif %}
+
+<form method="post">
+    <p>
+        <label>
+            <input type="radio" name="rezim" value="jeden" checked>
+            Započítať úrok na jednom účte
+        </label><br>
+        <label>Číslo účtu:
+            <input type="number" name="cislo_uctu">
+        </label>
+    </p>
+
+    <p>
+        <label>
+            <input type="radio" name="rezim" value="vsetky">
+            Započítať úrok na všetkých účtoch
+        </label>
+    </p>
+
+    <button type="submit">Spustiť</button>
+</form>
+{% endblock %}

@@ -228,10 +228,13 @@ def detail_uctu(cislo_uctu):
                 sprava = "Vklad bol úspešný."
             elif akcia == "vyber":
                 suma = float(request.form.get("suma", "0"))
-                je_dominsu = (u.typ == "DOMINUSU")
-                u.vyber(suma, je_majitel=(rola != "OPERATOR"), je_dominsu=je_dominsu)
+                if rola == "OPERATOR":
+                    raise PermissionError("Operátor nemôže vyberať z účtu.")
+                u.vyber(suma, je_majitel=True)
                 sprava = "Výber bol úspešný."
             elif akcia == "urok":
+                if rola != "OPERATOR":
+                    raise PermissionError("Úrok môže započítať iba operátor.")
                 u.zapocitaj_urok()
                 sprava = "Úrok bol započítaný."
         except Exception as e:
@@ -246,6 +249,7 @@ def detail_uctu(cislo_uctu):
         chyba=chyba,
         sprava=sprava
     )
+
 
 @app.route("/verejny_vklad", methods=["GET", "POST"])
 def verejny_vklad():
@@ -267,6 +271,126 @@ def verejny_vklad():
             chyba = f"Chyba pri vklade: {e}"
 
     return render_template("verejny_vklad.html", chyba=chyba, sprava=sprava)
+
+@app.route("/transakcie")
+def transakcie_prehlad():
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    cislo_uctu = request.args.get("cislo_uctu", "").strip()
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if cislo_uctu:
+        cursor.execute("""
+            SELECT t.id, t.cislo_uctu, t.typ_operacie, t.suma,
+                   t.popis, t.datum_cas,
+                   k.meno, k.priezvisko
+            FROM transakcia t
+            JOIN ucet u ON t.cislo_uctu = u.cislo_uctu
+            JOIN klient k ON u.id_majitela = k.id
+            WHERE t.cislo_uctu = %s
+            ORDER BY t.datum_cas DESC, t.id DESC
+        """, (cislo_uctu,))
+    else:
+        cursor.execute("""
+            SELECT t.id, t.cislo_uctu, t.typ_operacie, t.suma,
+                   t.popis, t.datum_cas,
+                   k.meno, k.priezvisko
+            FROM transakcia t
+            JOIN ucet u ON t.cislo_uctu = u.cislo_uctu
+            JOIN klient k ON u.id_majitela = k.id
+            ORDER BY t.datum_cas DESC, t.id DESC
+            LIMIT 200
+        """)
+
+    transakcie = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("transakcie.html",
+                           transakcie=transakcie,
+                           cislo_uctu=cislo_uctu)
+
+@app.route("/uroky_operator", methods=["GET", "POST"])
+def uroky_operator():
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    chyba = None
+    sprava = None
+
+    if request.method == "POST":
+        rezim = request.form.get("rezim", "jeden")
+        try:
+            if rezim == "jeden":
+                cislo_uctu = int(request.form.get("cislo_uctu", "0"))
+                u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+                if u is None:
+                    chyba = "Účet s týmto číslom neexistuje."
+                else:
+                    u.zapocitaj_urok()
+                    sprava = f"Úrok bol započítaný na účte {cislo_uctu}."
+            else:
+                # všetky účty
+                conn = get_connection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT cislo_uctu FROM ucet")
+                cisla = [row[0] for row in cursor.fetchall()]
+                cursor.close()
+                conn.close()
+
+                pocet = 0
+                for c in cisla:
+                    u = Ucet.nacitaj_podla_cisla(c)
+                    if u:
+                        u.zapocitaj_urok()
+                        pocet += 1
+                sprava = f"Úrok bol započítaný na {pocet} účtoch."
+        except Exception as e:
+            chyba = f"Chyba pri započítavaní úroku: {e}"
+
+    return render_template("uroky_operator.html",
+                           chyba=chyba,
+                           sprava=sprava)
+@app.route("/zmaz_ucet/<int:cislo_uctu>", methods=["POST"])
+def zmaz_ucet_web(cislo_uctu):
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM ucet WHERE cislo_uctu = %s", (cislo_uctu,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        sprava = f"Účet {cislo_uctu} bol zmazaný."
+    except Exception as e:
+        sprava = f"Chyba pri mazaní účtu: {e}"
+
+    return redirect(url_for("ucty_prehlad"))
+
+@app.route("/zmaz_klienta/<int:id_klienta>", methods=["POST"])
+def zmaz_klienta_web(id_klienta):
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM ucet WHERE id_majitela = %s", (id_klienta,))
+        cursor.execute("DELETE FROM klient WHERE id = %s", (id_klienta,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("Chyba pri mazaní klienta:", e)
+
+    return redirect(url_for("klienti_prehlad"))
 
 if __name__ == "__main__":
     app.run(debug=True)
