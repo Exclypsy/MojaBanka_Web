@@ -1,17 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Prihlásenie{% endblock %}
 {% block content %}
-<h1>Prihlásenie</h1>
+<h1 class="mb-3 text-center">Prihlásenie</h1>
+
 {% if chyba %}
-    <p style="color:red;">{{ chyba }}</p>
+    <div class="alert-error">{{ chyba }}</div>
 {% endif %}
-<form method="post">
-    <label>Email:
-        <input type="email" name="email" required>
-    </label><br>
-    <label>Heslo:
-        <input type="password" name="heslo" required>
-    </label><br>
-    <button type="submit">Prihlásiť</button>
+
+<form method="post" class="mx-auto" style="max-width: 400px;">
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" type="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Heslo</label>
+        <input class="form-control" type="password" name="heslo" required>
+    </div>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary px-4">Prihlásiť</button>
+    </div>
 </form>
 {% endblock %}
+

@@ -5,6 +5,6 @@ def get_connection():
         host="localhost",
         user="root",
         password="",
-        database="banka4SB"
+        database="banka4SB" #zmenit nazov na nazov svojej databazy
     )
     return conn

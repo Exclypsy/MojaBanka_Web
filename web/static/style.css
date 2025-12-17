@@ -1,0 +1,108 @@
+body {
+
+}
+
+.bg-primary-gradient {
+    background: linear-gradient(90deg, #5c6bc0, #8e24aa);
+}
+
+/* Nadpisy a texty */
+h1, h2, h3 {
+    color: #4a148c;
+    margin-bottom: 1rem;
+}
+
+a {
+    color: #8e24aa;
+}
+a:hover {
+    color: #4a148c;
+}
+
+form .form-label {
+    font-weight: 500;
+    color: #283593;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    border-radius: 6px;
+    border: 1px solid #c5cae9;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #8e24aa;
+    box-shadow: 0 0 0 0.15rem rgba(142, 36, 170, 0.25);
+}
+
+/* Tlačidlá – fialovo-ružové */
+
+.btn-primary {
+    background: linear-gradient(90deg, #5c6bc0, #8e24aa);
+    border: none;
+}
+.btn-primary:hover {
+    background: linear-gradient(90deg, #3949ab, #6a1b9a);
+}
+
+.btn-outline-danger {
+    border-color: #ef5350;
+    color: #c62828;
+}
+.btn-outline-danger:hover {
+    background-color: #ef5350;
+    color: #fff;
+}
+
+/* Chybové a úspešné správy */
+
+.alert-error {
+    background-color: #ffebee;
+    border-left: 4px solid #e53935;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+}
+
+.alert-success-custom {
+    background-color: #f3e5f5;
+    border-left: 4px solid #8e24aa;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+}
+
+/* Tabuľky */
+
+table {
+    font-size: 0.9rem;
+}
+
+table thead {
+    background: linear-gradient(90deg, #e8eaf6, #f3e5f5);
+}
+table thead th {
+    border-bottom: 2px solid #c5cae9;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #faf5ff;
+}
+
+/* Menšie medzery medzi prvkami na stránkach */
+
+.card-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.actions-inline button,
+.actions-inline form {
+    display: inline-block;
+    margin-right: 0.25rem;
+}

@@ -19,7 +19,7 @@ def prihlasenie():
     print(f"Prihlaseny: {klient.meno} {klient.priezvisko} ({klient.rola})")
     return klient
 
-def menu_operator(klient):
+def menu_operator():
     while True:
         print("\n=== MENU OPERÁTOR ===")
         print("1 - Vytvor klienta")

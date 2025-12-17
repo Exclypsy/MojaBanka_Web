@@ -1,41 +1,86 @@
 {% extends "base.html" %}
 {% block title %}Detail účtu{% endblock %}
 {% block content %}
-<h1>Detail účtu {{ u.cislo_uctu }}</h1>
+<h1 class="mb-3 text-center">Detail účtu {{ u.cislo_uctu }}</h1>
 
 {% if chyba %}
-    <p style="color:red;">{{ chyba }}</p>
+    <div class="alert-error">{{ chyba }}</div>
 {% endif %}
 {% if sprava %}
-    <p style="color:green;">{{ sprava }}</p>
+    <div class="alert-success-custom">{{ sprava }}</div>
 {% endif %}
 
-<ul>
-    <li>Majiteľ (ID): {{ u.id_majitela }}</li>
-    <li>Typ: {{ u.typ }}</li>
-    <li>Zostatok: {{ u.zostatok }}</li>
-    <li>Úrok: {{ u.urok }} %</li>
-    <li>Limit prečerpania: {{ u.limit_precerpania }}</li>
-    <li>Úrok v mínuse: {{ u.urok_v_minuse }}</li>
-</ul>
+<div class="row g-4">
+    <div class="col-md-6">
+        <h5 class="mb-3">Informácie o účte</h5>
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Majiteľ (ID):</span>
+                <span>{{ u.id_majitela }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Typ:</span>
+                <span>{{ u.typ }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Zostatok:</span>
+                <span>{{ u.zostatok }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Úrok:</span>
+                <span>{{ u.urok }} %</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Limit prečerpania:</span>
+                <span>{{ u.limit_precerpania }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Úrok v mínuse:</span>
+                <span>{{ u.urok_v_minuse }}</span>
+            </li>
+        </ul>
+    </div>
 
-<h2>Operácie</h2>
+    <div class="col-md-6">
+        <h5 class="mb-3">Operácie</h5>
+        <form method="post" class="mx-auto" style="max-width: 360px;">
+            <div class="mb-3">
+                <label class="form-label">Suma</label>
+                <input class="form-control" type="number" step="0.01" name="suma" required>
+            </div>
 
-<form method="post">
-    <label>Suma:
-        <input type="number" step="0.01" name="suma" required>
-    </label><br>
+            {% if rola == "OPERATOR" %}
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="submit" name="akcia" value="vklad" class="btn btn-primary">
+                        Vklad
+                    </button>
+                    <button type="submit" name="akcia" value="urok" class="btn btn-outline-secondary">
+                        Započítať úrok
+                    </button>
+                </div>
+            {% else %}
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="submit" name="akcia" value="vklad" class="btn btn-primary">
+                        Vklad
+                    </button>
+                    <button type="submit" name="akcia" value="vyber" class="btn btn-outline-danger">
+                        Výber
+                    </button>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
 
+<div class="mt-4 text-center">
     {% if rola == "OPERATOR" %}
-        <!-- Operátor: vklad + úrok -->
-        <button type="submit" name="akcia" value="vklad">Vklad</button>
-        <button type="submit" name="akcia" value="urok">Započítať úrok</button>
+        <a href="{{ url_for('ucty_prehlad') }}" class="btn btn-outline-secondary">
+            Späť na zoznam účtov
+        </a>
     {% else %}
-        <!-- Majiteľ: vklad + výber, bez úroku -->
-        <button type="submit" name="akcia" value="vklad">Vklad</button>
-        <button type="submit" name="akcia" value="vyber">Výber</button>
+        <a href="{{ url_for('moje_ucty') }}" class="btn btn-outline-secondary">
+            Späť na moje účty
+        </a>
     {% endif %}
-</form>
-
-<p><a href="{{ url_for('moje_ucty') }}">Späť na moje účty</a></p>
+</div>
 {% endblock %}

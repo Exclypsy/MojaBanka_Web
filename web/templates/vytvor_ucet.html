@@ -1,49 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Vytvorenie účtu{% endblock %}
 {% block content %}
-<h1>Vytvorenie účtu</h1>
+<h1 class="mb-3 text-center">Vytvorenie účtu (Formulár B)</h1>
 
 {% if chyba %}
-    <p style="color:red;">{{ chyba }}</p>
+    <div class="alert-error">{{ chyba }}</div>
 {% endif %}
 {% if sprava %}
-    <p style="color:green;">{{ sprava }}</p>
+    <div class="alert-success-custom">{{ sprava }}</div>
 {% endif %}
 
-<form method="post">
-    <label>Majiteľ (klient):
-        <select name="id_majitela" required>
+<form method="post" class="mx-auto" style="max-width: 550px;">
+    <div class="mb-3">
+        <label class="form-label">Majiteľ (klient)</label>
+        <select class="form-select" name="id_majitela" required>
             {% for k in klienti %}
                 <option value="{{ k.id }}">
-                    {{ k.id }} - {{ k.meno }} {{ k.priezvisko }} ({{ k.email }})
+                    {{ k.id }} – {{ k.meno }} {{ k.priezvisko }} ({{ k.email }})
                 </option>
             {% endfor %}
         </select>
-    </label><br>
+    </div>
 
-    <label>Počiatočný zostatok:
-        <input type="number" step="0.01" name="zostatok" value="0" required>
-    </label><br>
+    <div class="mb-3">
+        <label class="form-label">Počiatočný zostatok</label>
+        <input class="form-control" type="number" step="0.01" name="zostatok" value="0" required>
+    </div>
 
-    <label>Úrok (%):
-        <input type="number" step="0.01" name="urok" value="1.0" required>
-    </label><br>
+    <div class="mb-3">
+        <label class="form-label">Úrok (%)</label>
+        <input class="form-control" type="number" step="0.01" name="urok" value="1.0" required>
+    </div>
 
-    <label>Typ účtu:
-        <select name="typ" id="typ-uctu">
+    <div class="mb-3">
+        <label class="form-label">Typ účtu</label>
+        <select class="form-select" name="typ" id="typ-uctu">
             <option value="BEZNE">Bežné</option>
             <option value="DOMINUSU">Do mínusu</option>
         </select>
-    </label><br>
+    </div>
 
-    <label>Limit prečerpania:
-        <input type="number" step="0.01" name="limit_precerpania">
-    </label><br>
+    <div class="mb-3">
+        <label class="form-label">Limit prečerpania (len pre účet do mínusu)</label>
+        <input class="form-control" type="number" step="0.01" name="limit_precerpania">
+    </div>
 
-    <label>Úrok v mínuse (%):
-        <input type="number" step="0.01" name="urok_v_minuse">
-    </label><br>
+    <div class="mb-3">
+        <label class="form-label">Úrok v mínuse (%)</label>
+        <input class="form-control" type="number" step="0.01" name="urok_v_minuse">
+    </div>
 
-    <button type="submit">Vytvoriť účet</button>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary px-4">Vytvoriť účet</button>
+    </div>
 </form>
 {% endblock %}

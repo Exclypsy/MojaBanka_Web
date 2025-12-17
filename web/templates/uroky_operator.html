@@ -1,45 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Započítanie úrokov{% endblock %}
 {% block content %}
-<h1>Započítanie úrokov</h1>
+<h1 class="mb-3 text-center">Započítanie úrokov (operátor)</h1>
 
 {% if chyba %}
-    <p style="color:red;">{{ chyba }}</p>
+    <div class="alert-error">{{ chyba }}</div>
 {% endif %}
 {% if sprava %}
-    <p style="color:green;">{{ sprava }}</p>
+    <div class="alert-success-custom">{{ sprava }}</div>
 {% endif %}
 
-<form method="post">
-    <p>
-        <label>
-            <input type="radio" name="rezim" value="jeden" checked>
-            Započítať úrok na jednom účte
-        </label><br>
+<form method="post" class="mx-auto" style="max-width: 550px;">
+    <div class="mb-3">
+        <label class="form-label">Režim</label>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rezim" id="rezim-jeden"
+                   value="jeden" checked>
+            <label class="form-check-label" for="rezim-jeden">
+                Započítať úrok na jednom účte
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rezim" id="rezim-vsetky"
+                   value="vsetky">
+            <label class="form-check-label" for="rezim-vsetky">
+                Započítať úrok na všetkých účtoch
+            </label>
+        </div>
+    </div>
 
-        <label>Účet:
-            <select name="cislo_uctu">
-                <option value="">– vyber účet –</option>
-                {% for u in ucty %}
-                    <option value="{{ u.cislo_uctu }}"
-                        {% if vybrany_ucet and vybrany_ucet|int == u.cislo_uctu %}selected{% endif %}>
-                        {{ u.cislo_uctu }} – {{ u.meno }} {{ u.priezvisko }}
-                        (zostatok {{ u.zostatok }}, úrok {{ u.urok }}%
-                        {% if u.typ == 'DOMINUSU' %}, úrok v mínuse {{ u.urok_v_minuse }}%{% endif %})
-                    </option>
-                {% endfor %}
-            </select>
+    <div class="mb-3">
+        <label class="form-label">Účet (pre režim „jeden“)</label>
+        <select class="form-select" name="cislo_uctu">
+            <option value="">– vyber účet –</option>
+            {% for u in ucty %}
+                <option value="{{ u.cislo_uctu }}"
+                    {% if vybrany_ucet and vybrany_ucet|int == u.cislo_uctu %}selected{% endif %}>
+                    {{ u.cislo_uctu }} – {{ u.meno }} {{ u.priezvisko }}
+                    (zostatok {{ u.zostatok }}, úrok {{ u.urok }}%
+                    {% if u.typ == 'DOMINUSU' %}, úrok v mínuse {{ u.urok_v_minuse }}%{% endif %})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-        </label>
-    </p>
-
-    <p>
-        <label>
-            <input type="radio" name="rezim" value="vsetky">
-            Započítať úrok na všetkých účtoch
-        </label>
-    </p>
-
-    <button type="submit">Spustiť</button>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary px-4">
+            Spustiť započítanie úroku
+        </button>
+    </div>
 </form>
 {% endblock %}

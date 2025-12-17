@@ -1,39 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Účty{% endblock %}
 {% block content %}
-<h1>Účty</h1>
+<h1 class="mb-3 text-center">Účty</h1>
 
-<table border="1" cellpadding="4">
+<table class="table table-striped table-hover align-middle">
+    <thead>
     <tr>
         <th>Číslo účtu</th>
         <th>Majiteľ (ID)</th>
-        <th>Majiteľ meno</th>
+        <th>Majiteľ</th>
         <th>Email</th>
         <th>Typ</th>
         <th>Zostatok</th>
         <th>Úrok</th>
         <th>Limit</th>
         <th>Úrok v mínuse</th>
+        <th>Akcie</th>
     </tr>
+    </thead>
+    <tbody>
     {% for u in ucty %}
-    <tr>
-        <td>{{ u.cislo_uctu }}</td>
-        <td>{{ u.id_majitela }}</td>
-        <td>{{ u.meno }} {{ u.priezvisko }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.typ }}</td>
-        <td>{{ u.zostatok }}</td>
-        <td>{{ u.urok }}</td>
-        <td>{{ u.limit_precerpania }}</td>
-        <td>{{ u.urok_v_minuse }}</td>
-        <td>
-            <form method="post" action="{{ url_for('zmaz_ucet_web', cislo_uctu=u.cislo_uctu) }}"
-                  onsubmit="return confirm('Naozaj zmazať účet {{ u.cislo_uctu }}?');">
-                <button type="submit">Zmazať</button>
-            </form>
-        </td>
-    </tr>
+        <tr>
+            <td>{{ u.cislo_uctu }}</td>
+            <td>{{ u.id_majitela }}</td>
+            <td>{{ u.meno }} {{ u.priezvisko }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.typ }}</td>
+            <td>{{ u.zostatok }}</td>
+            <td>{{ u.urok }}</td>
+            <td>{{ u.limit_precerpania }}</td>
+            <td>{{ u.urok_v_minuse }}</td>
+            <td class="actions-inline">
+                <a href="{{ url_for('detail_uctu', cislo_uctu=u.cislo_uctu) }}" class="btn btn-sm btn-outline-secondary">Detail</a>
+                <form method="post" action="{{ url_for('zmaz_ucet_web', cislo_uctu=u.cislo_uctu) }}"
+                      class="d-inline"
+                      onsubmit="return confirm('Naozaj zmazať účet {{ u.cislo_uctu }}?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Zmazať</button>
+                </form>
+            </td>
+        </tr>
     {% endfor %}
-
+    </tbody>
 </table>
 {% endblock %}

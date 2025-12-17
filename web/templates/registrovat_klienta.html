@@ -1,34 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Registrácia klienta{% endblock %}
 {% block content %}
-<h1>Registrácia klienta</h1>
+<h1 class="mb-3 text-center">Registrácia klienta (Formulár A)</h1>
 
 {% if chyba %}
-    <p style="color:red;">{{ chyba }}</p>
+    <div class="alert-error">{{ chyba }}</div>
 {% endif %}
 {% if sprava %}
-    <p style="color:green;">{{ sprava }}</p>
+    <div class="alert-success-custom">{{ sprava }}</div>
 {% endif %}
 
-<form method="post">
-    <label>Meno:
-        <input type="text" name="meno" required>
-    </label><br>
-    <label>Priezvisko:
-        <input type="text" name="priezvisko" required>
-    </label><br>
-    <label>Email:
-        <input type="email" name="email" required>
-    </label><br>
-    <label>Heslo:
-        <input type="password" name="heslo" required>
-    </label><br>
-    <label>Rola:
-        <select name="rola">
+<form method="post" class="mx-auto" style="max-width: 500px;">
+    <div class="mb-3">
+        <label class="form-label">Meno</label>
+        <input class="form-control" type="text" name="meno" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Priezvisko</label>
+        <input class="form-control" type="text" name="priezvisko" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" type="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Heslo</label>
+        <input class="form-control" type="password" name="heslo" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Rola</label>
+        <select class="form-select" name="rola">
             <option value="MAJITEL">Majiteľ</option>
             <option value="OPERATOR">Operátor</option>
         </select>
-    </label><br>
-    <button type="submit">Vytvoriť klienta</button>
+    </div>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary px-4">Vytvoriť klienta</button>
+    </div>
 </form>
 {% endblock %}

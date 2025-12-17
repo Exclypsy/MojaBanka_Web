@@ -4,7 +4,7 @@ from modely.klient import Klient
 from modely.ucet import Ucet
 from modely.ucet_do_minusu import UcetDoMinusu
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = "tajne_tajne"
 
 @app.route("/")

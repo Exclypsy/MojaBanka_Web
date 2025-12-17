@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}MojaBanka - Domov{% endblock %}
 {% block content %}
-<h1>Vitaj v MojaBanka</h1>
-<p><a href="{{ url_for('login') }}">Prihlásiť sa</a></p>
-<p><a href="{{ url_for('verejny_vklad') }}">Verejný vklad na účet</a></p>
+<h1 class="mb-3 text-center">Vitaj v MojaBanka</h1>
+
+<p class="text-center text-muted mb-4">
+    Školský projekt jednoduchej bankovej aplikácie s účtami, klientmi a webovým rozhraním.
+</p>
+
+<div class="d-flex justify-content-center gap-3 flex-wrap">
+    <a href="{{ url_for('login') }}" class="btn btn-primary px-4">
+        Prihlásiť sa
+    </a>
+    <a href="{{ url_for('verejny_vklad') }}" class="btn btn-outline-secondary px-4">
+        Verejný vklad na účet
+    </a>
+</div>
 {% endblock %}

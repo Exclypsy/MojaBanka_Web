@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Klienti{% endblock %}
 {% block content %}
-<h1>Klienti</h1>
+<h1 class="mb-3 text-center">Klienti</h1>
 
-<table border="1" cellpadding="4">
+<table class="table table-striped table-hover align-middle">
+    <thead>
     <tr>
         <th>ID</th>
         <th>Meno</th>
@@ -12,32 +13,36 @@
         <th>Účty</th>
         <th>Akcie</th>
     </tr>
+    </thead>
+    <tbody>
     {% for k in klienti %}
-    <tr>
-        <td>{{ k.id }}</td>
-        <td>{{ k.meno }} {{ k.priezvisko }}</td>
-        <td>{{ k.email }}</td>
-        <td>{{ k.rola }}</td>
-        <td>
-            {% if not k.ucty %}
-                žiadne účty
-            {% else %}
-                <ul>
-                {% for u in k.ucty %}
-                    <li>
-                        {{ u.cislo_uctu }} ({{ u.typ }}, zostatok {{ u.zostatok }})
-                    </li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-        </td>
-        <td>
-            <form method="post" action="{{ url_for('zmaz_klienta_web', id_klienta=k.id) }}"
-                  onsubmit="return confirm('Naozaj zmazať klienta ID {{ k.id }} a jeho účty?');">
-                <button type="submit">Zmazať</button>
-            </form>
-        </td>
-    </tr>
+        <tr>
+            <td>{{ k.id }}</td>
+            <td>{{ k.meno }} {{ k.priezvisko }}</td>
+            <td>{{ k.email }}</td>
+            <td>{{ k.rola }}</td>
+            <td>
+                {% if not k.ucty %}
+                    <span class="text-muted">žiadne účty</span>
+                {% else %}
+                    <ul class="mb-0">
+                        {% for u in k.ucty %}
+                            <li>
+                                {{ u.cislo_uctu }} ({{ u.typ }}, zostatok {{ u.zostatok }})
+                                – <a href="{{ url_for('detail_uctu', cislo_uctu=u.cislo_uctu) }}">detail</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{{ url_for('zmaz_klienta_web', id_klienta=k.id) }}"
+                      onsubmit="return confirm('Naozaj zmazať klienta ID {{ k.id }} a jeho účty?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Zmazať</button>
+                </form>
+            </td>
+        </tr>
     {% endfor %}
+    </tbody>
 </table>
 {% endblock %}
