@@ -68,6 +68,7 @@ class Ucet:
         conn = get_connection()
         cursor = conn.cursor()
         sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
+        self._zaloguj_operaciu("VKLAD", suma)
         cursor.execute(sql, (self.zostatok, self.cislo_uctu))
         conn.commit()
         cursor.close()
@@ -97,12 +98,14 @@ class Ucet:
         conn = get_connection()
         cursor = conn.cursor()
         sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
+        self._zaloguj_operaciu("VYBER", suma)
         cursor.execute(sql, (self.zostatok, self.cislo_uctu))
         conn.commit()
         cursor.close()
         conn.close()
 
     def zapocitaj_urok(self):
+        stary = float(self.zostatok)
         if self.zostatok >= 0:
             self.zostatok = self.zostatok * (1 + self.urok / 100.0)
         else:
@@ -113,6 +116,8 @@ class Ucet:
         conn = get_connection()
         cursor = conn.cursor()
         sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
+        delta = float(self.zostatok) - stary
+        self._zaloguj_operaciu("UROK", delta, popis="Započítanie úroku")
         cursor.execute(sql, (self.zostatok, self.cislo_uctu))
         conn.commit()
         cursor.close()
@@ -133,6 +138,17 @@ class Ucet:
         if row is None:
             return None
 
+        if row["typ"] == "DOMINUSU":
+            from modely.ucet_do_minusu import UcetDoMinusu
+            return UcetDoMinusu(
+                cislo_uctu=row["cislo_uctu"],
+                id_majitela=row["id_majitela"],
+                zostatok=float(row["zostatok"]),
+                urok=float(row["urok"]),
+                limit_precerpania=row["limit_precerpania"],
+                urok_v_minuse=row["urok_v_minuse"]
+            )
+
         return Ucet(
             cislo_uctu=row["cislo_uctu"],
             id_majitela=row["id_majitela"],
@@ -142,6 +158,19 @@ class Ucet:
             limit_precerpania=row["limit_precerpania"],
             urok_v_minuse=row["urok_v_minuse"]
         )
+
+    def _zaloguj_operaciu(self, typ_operacie, suma=None, popis=None):
+        from databaza.db import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = """
+            INSERT INTO transakcia (cislo_uctu, typ_operacie, suma, popis)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(sql, (self.cislo_uctu, typ_operacie, suma, popis))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def __str__(self):
         return f"Ucet {self.cislo_uctu}, majitel {self.id_majitela}, zostatok {self.zostatok}"

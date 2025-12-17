@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from databaza.db import get_connection
 from modely.klient import Klient
 from modely.ucet import Ucet
+from modely.ucet_do_minusu import UcetDoMinusu
 
 app = Flask(__name__)
 app.secret_key = "tajne_tajne"
@@ -114,15 +115,22 @@ def vytvor_ucet_web():
 
             limit_val = float(limit) if limit else None
             urok_m_val = float(urok_m) if urok_m else None
+            if typ == "DOMINUSU":
+                u = UcetDoMinusu(
+                    id_majitela=id_majitela,
+                    zostatok=zostatok,
+                    urok=urok,
+                    limit_precerpania=limit_val,
+                    urok_v_minuse=urok_m_val
+                )
+            else:
+                u = Ucet(
+                    id_majitela=id_majitela,
+                    zostatok=zostatok,
+                    urok=urok,
+                    typ=typ
+                )
 
-            u = Ucet(
-                id_majitela=id_majitela,
-                zostatok=zostatok,
-                urok=urok,
-                typ=typ,
-                limit_precerpania=limit_val,
-                urok_v_minuse=urok_m_val
-            )
             u.uloz_do_db()
             sprava = f"Účet vytvorený, číslo: {u.cislo_uctu}"
         except Exception as e:
