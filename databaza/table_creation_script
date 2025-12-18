@@ -33,3 +33,12 @@ CREATE TABLE IF NOT EXISTS transakcia (
         ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS main_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cas TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    email VARCHAR(100) NULL,          -- kto to urobil (email prihláseného)
+    rola VARCHAR(20) NULL,            -- MAJITEL / OPERATOR / ANONYM
+    akcia VARCHAR(50) NOT NULL,       -- napr. LOGIN, VYTVOR_KLIENTA, VKLAD, VYBER, ...
+    detail TEXT NULL                  -- textový popis, čo sa stalo
+);
+

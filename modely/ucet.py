@@ -1,4 +1,5 @@
 from databaza.db import get_connection
+from modely.audit import zaloguj_audit
 
 class Ucet:
     def __init__(self, cislo_uctu=None, id_majitela=None,
@@ -69,6 +70,7 @@ class Ucet:
         cursor = conn.cursor()
         sql = "UPDATE ucet SET zostatok = %s WHERE cislo_uctu = %s"
         self._zaloguj_operaciu("VKLAD", suma)
+        zaloguj_audit("VKLAD", f"ucet={self.cislo_uctu}, suma={suma}")
         cursor.execute(sql, (self.zostatok, self.cislo_uctu))
         conn.commit()
         cursor.close()
@@ -103,6 +105,7 @@ class Ucet:
         cursor.close()
         conn.close()
         self._zaloguj_operaciu("VYBER", suma)
+        zaloguj_audit("VYBER", f"ucet={self.cislo_uctu}, suma={suma}")
 
     def zapocitaj_urok(self):
         stary = float(self.zostatok)

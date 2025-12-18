@@ -3,6 +3,7 @@ from databaza.db import get_connection
 from modely.klient import Klient
 from modely.ucet import Ucet
 from modely.ucet_do_minusu import UcetDoMinusu
+from modely.audit import zaloguj_audit
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = "tajne_tajne"
@@ -28,12 +29,15 @@ def login():
             session["klient_meno"] = klient.meno
             session["klient_rola"] = klient.rola
             session["klient_priezvisko"] = klient.priezvisko
+            session["klient_email"] = klient.email
+            zaloguj_audit("LOGIN", f"Prihlásenie používateľa {klient.email}")
             return redirect(url_for("dashboard"))
 
     return render_template("login.html", chyba=chyba)
 
 @app.route("/logout")
 def logout():
+    zaloguj_audit("LOGOUT", f"Odhlásenie používateľa {session.get('klient_email')}")
     session.clear()
     return redirect(url_for("index"))
 
@@ -84,9 +88,9 @@ def registrovat_klienta():
                                email=email, heslo=heslo, rola=rola)
                     k.uloz_do_db()
                     sprava = f"Klient vytvorený, ID: {k.id}"
+                    zaloguj_audit("VYTVORENIE KLIENTA", f"ID={k.id}, email={k.email}")
                 except Exception as e:
                     chyba = f"Chyba pri vytváraní klienta: {e}"
-
     return render_template("registrovat_klienta.html",
                            chyba=chyba, sprava=sprava)
 
@@ -131,7 +135,7 @@ def vytvor_ucet_web():
                     urok=urok,
                     typ=typ
                 )
-
+            zaloguj_audit("VYTVORENIE UCTU", f"číslo účtu = {u.cislo_uctu}, majiteľ id={u.id_majitela}")
             u.uloz_do_db()
             sprava = f"Účet vytvorený, číslo: {u.cislo_uctu}"
         except Exception as e:
@@ -166,12 +170,10 @@ def klienti_prehlad():
     cursor.close()
     conn.close()
 
-    # priradiť účty ku klientom
     ucty_podla_klienta = {}
     for r in ucty_rows:
         ucty_podla_klienta.setdefault(r["id_majitela"], []).append(r)
 
-    # doplniť zoznam účtov do každého klienta
     for k in klienti:
         k["ucty"] = ucty_podla_klienta.get(k["id"], [])
 
@@ -499,6 +501,7 @@ def upravit_klienta_web(id_klienta):
                         WHERE id = %s
                     """
                     cursor.execute(sql, (meno, priezvisko, email, rola, id_klienta))
+                zaloguj_audit("UPRAVA_KLIENTA", f"ID={id_klienta}, email={email}")
                 conn.commit()
                 cursor.close()
                 conn.close()
@@ -542,6 +545,7 @@ def upravit_ucet_web(cislo_uctu):
             u.urok_v_minuse = float(urok_m) if urok_m else None
 
             u.uloz_do_db()
+            zaloguj_audit("UPRAVA_UCTU", f"cislo_uctu={u.cislo_uctu}")
             sprava = "Údaje účtu boli upravené."
         except Exception as e:
             chyba = f"Chyba pri úprave účtu: {e}"
@@ -549,6 +553,27 @@ def upravit_ucet_web(cislo_uctu):
         u = Ucet.nacitaj_podla_cisla(cislo_uctu)
 
     return render_template("upravit_ucet.html", u=u, chyba=chyba, sprava=sprava)
+
+@app.route("/audit_log")
+def audit_log_prehlad():
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT id, cas, email, rola, akcia, detail
+        FROM main_log
+        ORDER BY cas DESC, id DESC
+        LIMIT 500
+    """)
+    logy = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("audit_log.html", logy=logy)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

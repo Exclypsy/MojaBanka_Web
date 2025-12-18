@@ -1,3 +1,4 @@
+from modely.audit import zaloguj_audit
 from modely.klient import Klient
 from modely.ucet import Ucet
 from databaza.db import get_connection
@@ -17,9 +18,16 @@ def prihlasenie():
         return None
 
     print(f"Prihlaseny: {klient.meno} {klient.priezvisko} ({klient.rola})")
+    zaloguj_audit(
+        "LOGIN",
+        f"Prihlásenie používateľa {klient.email}",
+        email=klient.email,
+        rola=klient.rola
+    )
+
     return klient
 
-def menu_operator():
+def menu_operator(klient):
     while True:
         print("\n=== MENU OPERÁTOR ===")
         print("1 - Vytvor klienta")
@@ -30,6 +38,8 @@ def menu_operator():
         print("6 - Zarátať úrok na účte")
         print("7 - Zmazať klienta")
         print("8 - Zmazať účet")
+        print("9 - Zobraz transakcie")
+        print("10 - Zobraz log")
         print("0 - Odhlásiť")
 
         volba = input("Zadaj voľbu: ")
@@ -50,7 +60,17 @@ def menu_operator():
             zmaz_klienta()
         elif volba == "8":
             zmaz_ucet()
+        elif volba == "9":
+            zobraz_transakcie_konzola()
+        elif volba == "10":
+            zobraz_logy_konzola()
         elif volba == "0":
+            zaloguj_audit(
+                "LOGOFF",
+                f"Odhlásenie používateľa {klient.email}",
+                email=klient.email,
+                rola=klient.rola
+            )
             break
         else:
             print("Neplatná voľba.")
@@ -72,11 +92,17 @@ def menu_majitel(klient):
         elif volba == "3":
             vyber_moj_ucet(klient)
         elif volba == "0":
+            zaloguj_audit(
+                "LOGOFF",
+                f"Odhlásenie používateľa {klient.email}",
+                email=klient.email,
+                rola=klient.rola
+            )
             break
         else:
             print("Neplatna volba.")
 
-def vytvor_klienta():
+def vytvor_klienta(klient):
     print("\n=== Vytvorenie klienta ===")
     meno = input("Meno: ")
     priezvisko = input("Priezvisko: ")
@@ -87,11 +113,17 @@ def vytvor_klienta():
     k = Klient(meno=meno, priezvisko=priezvisko, email=email, heslo=heslo, rola=rola)
     try:
         k.uloz_do_db()
+        zaloguj_audit(
+            "VYTVORENIE_KLIENTA",
+            f"ID={k.id}, email={k.email}",
+            email = klient.email,
+            rola = klient.rola
+        )
         print("Klient vytvoreny, id:", k.id)
     except Exception as e:
         print("Chyba pri vytvarani klienta:", e)
 
-def vytvor_ucet():
+def vytvor_ucet(klient):
     print("\n=== Vytvorenie uctu ===")
     try:
         id_maj = int(input("ID majitela: "))
@@ -114,6 +146,13 @@ def vytvor_ucet():
             urok_v_minuse=urok_m
         )
         u.uloz_do_db()
+        zaloguj_audit(
+            "VYTVORENIE_UCTU",
+            f"cislo_uctu={u.cislo_uctu}, majitel_id={u.id_majitela}",
+            email = klient.email,
+            rola = klient.rola
+        )
+
         print("Ucet vytvoreny, cislo:", u.cislo_uctu)
     except Exception as e:
         print("Chyba pri vytvarani uctu:", e)
@@ -155,7 +194,7 @@ def zobraz_vsetkych_klientov():
     except Exception as e:
         print("Chyba pri zobrazovaní klientov:", e)
 
-def vklad_na_ucet():
+def vklad_na_ucet(klient):
     print("\n=== Vklad na ucet ===")
     try:
         cislo = int(input("Cislo uctu: "))
@@ -165,11 +204,19 @@ def vklad_na_ucet():
             print("Ucet neexistuje.")
             return
         u.vklad(suma)
+        print("Vklad ok, nový zostatok:", u.zostatok)
+        zaloguj_audit(
+            "VKLAD",
+            f"ucet={u.cislo_uctu}, suma={suma}",
+            email = klient.email,
+            rola = klient.rola
+        )
+
         print("Vklad ok, novy zostatok:", u.zostatok)
     except Exception as e:
         print("Chyba pri vklade:", e)
 
-def zarataj_urok():
+def zarataj_urok(klient):
     print("\n=== Zaratat urok ===")
     try:
         cislo = int(input("Cislo uctu: "))
@@ -178,6 +225,14 @@ def zarataj_urok():
             print("Ucet neexistuje.")
             return
         u.zapocitaj_urok()
+        print("Úrok zarátaný, nový zostatok:", u.zostatok)
+        zaloguj_audit(
+            "ZAPOCITANIE_UROKU",
+            f"ucet={u.cislo_uctu}",
+            email=klient.email,
+            rola=klient.rola
+        )
+
         print("Urok zaratany, novy zostatok:", u.zostatok)
     except Exception as e:
         print("Chyba pri ucte:", e)
@@ -209,7 +264,13 @@ def vklad_moj_ucet(klient):
             print("Tento ucet vam nepatri.")
             return
         u.vklad(suma)
-        print("Vklad ok, novy zostatok:", u.zostatok)
+        print("Vklad ok, nový zostatok:", u.zostatok)
+        zaloguj_audit(
+            "VKLAD",
+            f"ucet={u.cislo_uctu}, suma={suma}",
+            email=klient.email,
+            rola=klient.rola
+        )
     except Exception as e:
         print("Chyba pri vklade:", e)
 
@@ -224,11 +285,19 @@ def vyber_moj_ucet(klient):
             return
         je_dominsu = (u.typ == "DOMINUSU")
         u.vyber(suma, je_majitel=True, je_dominsu=je_dominsu)
+        print("Výber ok, nový zostatok:", u.zostatok)
+        zaloguj_audit(
+            "VYBER",
+            f"ucet={u.cislo_uctu}, suma={suma}",
+            email=klient.email,
+            rola=klient.rola
+        )
+
         print("Vyber ok, novy zostatok:", u.zostatok)
     except Exception as e:
         print("Chyba pri vybere:", e)
 
-def zmaz_klienta():
+def zmaz_klienta(klient):
     print("\n=== Zmazanie klienta ===")
     try:
         id_klienta = int(input("Zadaj ID klienta na zmazanie: "))
@@ -258,6 +327,14 @@ def zmaz_klienta():
         cursor.execute("DELETE FROM ucet WHERE id_majitela = %s", (id_klienta,))
         cursor.execute("DELETE FROM klient WHERE id = %s", (id_klienta,))
 
+        print("Klient a jeho účty boli zmazané.")
+        zaloguj_audit(
+            "ZMAZANIE_KLIENTA",
+            f"id_klienta={id_klienta}",
+            email=klient.email,
+            rola=klient.rola
+        )
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -266,7 +343,7 @@ def zmaz_klienta():
     except Exception as e:
         print("Chyba pri mazaní klienta:", e)
 
-def zmaz_ucet():
+def zmaz_ucet(klient):
     print("\n=== Zmazanie účtu ===")
     try:
         cislo = int(input("Zadaj číslo účtu na zmazanie: "))
@@ -285,6 +362,13 @@ def zmaz_ucet():
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM ucet WHERE cislo_uctu = %s", (cislo,))
+        print("Účet bol zmazaný.")
+        zaloguj_audit(
+            "ZMAZANIE_UCTU",
+            f"cislo_uctu={cislo}",
+            email=klient.email,
+            rola=klient.rola
+        )
         conn.commit()
         cursor.close()
         conn.close()
@@ -293,10 +377,65 @@ def zmaz_ucet():
     except Exception as e:
         print("Chyba pri mazaní účtu:", e)
 
+def zobraz_transakcie_konzola():
+    print("\n=== Transakcie (konzola) ===")
+    cislo = input("Zadaj číslo účtu (ENTER = všetky): ").strip()
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if cislo:
+        try:
+            cislo_int = int(cislo)
+        except ValueError:
+            print("Neplatné číslo účtu.")
+            cursor.close()
+            conn.close()
+            return
+
+        sql = """
+            SELECT t.id, t.cislo_uctu, t.typ_operacie, t.suma,
+                   t.popis, t.datum_cas,
+                   k.meno, k.priezvisko
+            FROM transakcia t
+            JOIN ucet u ON t.cislo_uctu = u.cislo_uctu
+            JOIN klient k ON u.id_majitela = k.id
+            WHERE t.cislo_uctu = %s
+            ORDER BY t.datum_cas DESC, t.id DESC
+        """
+        cursor.execute(sql, (cislo_int,))
+    else:
+        sql = """
+            SELECT t.id, t.cislo_uctu, t.typ_operacie, t.suma,
+                   t.popis, t.datum_cas,
+                   k.meno, k.priezvisko
+            FROM transakcia t
+            JOIN ucet u ON t.cislo_uctu = u.cislo_uctu
+            JOIN klient k ON u.id_majitela = k.id
+            ORDER BY t.datum_cas DESC, t.id DESC
+            LIMIT 100
+        """
+        cursor.execute(sql)
+
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not rows:
+        print("Žiadne transakcie.")
+        return
+
+    for r in rows:
+        print(
+            f"[{r['id']}] {r['datum_cas']} | účet {r['cislo_uctu']} "
+            f"({r['meno']} {r['priezvisko']}) | {r['typ_operacie']} "
+            f"suma={r['suma']}"
+        )
+
 
 def main():
     while True:
-        print("\n=== MojaBanka konzola ===")
+        print("\n=== BanqaMS konzola ===")
         print("1 - Prihlasit")
         print("0 - Koniec")
         volba = input("Zadaj volbu: ")
@@ -314,6 +453,37 @@ def main():
             break
         else:
             print("Neplatna volba.")
+
+def zobraz_logy_konzola():
+    print("\n=== Log (systémové záznamy) ===")
+    pocet_text = input("Koľko záznamov zobraziť? (ENTER = 50): ").strip()
+    try:
+        limit = int(pocet_text) if pocet_text else 50
+    except ValueError:
+        limit = 50
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(f"""
+        SELECT id, cas, email, rola, akcia, detail
+        FROM main_log
+        ORDER BY cas DESC, id DESC
+        LIMIT {limit}
+    """)
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not rows:
+        print("Žiadne záznamy v main_log.")
+        return
+
+    for r in rows:
+        print(
+            f"{r['cas']} | {r['email'] or '–'} "
+            f"({r['rola']}) | {r['akcia']} | {r['detail']}"
+        )
+
 
 if __name__ == "__main__":
     main()
