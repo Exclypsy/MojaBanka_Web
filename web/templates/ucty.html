@@ -31,7 +31,10 @@
             <td>{{ u.limit_precerpania }}</td>
             <td>{{ u.urok_v_minuse }}</td>
             <td class="actions-inline">
-                <a href="{{ url_for('detail_uctu', cislo_uctu=u.cislo_uctu) }}" class="btn btn-sm btn-outline-secondary">Detail</a>
+                <a href="{{ url_for('upravit_ucet_web', cislo_uctu=u.cislo_uctu) }}"
+                   class="btn btn-sm btn-outline-secondary mb-1">
+                    Upraviť
+                </a>
                 <form method="post" action="{{ url_for('zmaz_ucet_web', cislo_uctu=u.cislo_uctu) }}"
                       class="d-inline"
                       onsubmit="return confirm('Naozaj zmazať účet {{ u.cislo_uctu }}?');">

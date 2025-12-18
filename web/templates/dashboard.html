@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="mb-3 text-center">Prehľad</h1>
 <p class="text-center mb-4">
-    Ahoj <strong>{{ meno }}</strong>, tvoja rola je <strong>{{ rola }}</strong>.
+    Vitajte <strong>{{ meno }}</strong>, tu máte všetky účty ako na dlani.
 </p>
 
 {% if rola == "OPERATOR" %}
@@ -11,10 +11,10 @@
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5 class="card-title text-primary">Klienti a účty</h5>
+                    <h3 class="card-title text-primary">Klienti a účty</h3>
                     <ul class="list-unstyled mb-0">
-                        <li><a href="{{ url_for('registrovat_klienta') }}">Registrácia klienta (Formulár A)</a></li>
-                        <li><a href="{{ url_for('vytvor_ucet_web') }}">Vytvorenie účtu (Formulár B)</a></li>
+                        <li><a href="{{ url_for('registrovat_klienta') }}">Registrácia klienta</a></li>
+                        <li><a href="{{ url_for('vytvor_ucet_web') }}">Vytvorenie účtu</a></li>
                         <li><a href="{{ url_for('klienti_prehlad') }}">Zobraziť všetkých klientov</a></li>
                         <li><a href="{{ url_for('ucty_prehlad') }}">Zobraziť všetky účty</a></li>
                     </ul>
@@ -24,11 +24,10 @@
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5 class="card-title text-primary">Operácie</h5>
+                    <h3 class="card-title text-primary">Operácie</h3>
                     <ul class="list-unstyled mb-0">
                         <li><a href="{{ url_for('transakcie_prehlad') }}">Zobraziť transakcie</a></li>
                         <li><a href="{{ url_for('uroky_operator') }}">Započítanie úrokov</a></li>
-                        <li><a href="{{ url_for('verejny_vklad') }}">Verejný vklad na účet</a></li>
                     </ul>
                 </div>
             </div>
@@ -36,7 +35,6 @@
     </div>
 {% else %}
     <div class="text-center">
-        <p class="mb-3">Si majiteľ účtov.</p>
         <a href="{{ url_for('moje_ucty') }}" class="btn btn-primary">Moje účty</a>
         <a href="{{ url_for('verejny_vklad') }}" class="btn btn-outline-secondary ms-2">Verejný vklad</a>
     </div>

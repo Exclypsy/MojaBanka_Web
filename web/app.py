@@ -45,7 +45,8 @@ def dashboard():
     return render_template(
         "dashboard.html",
         meno=session.get("klient_meno"),
-        rola=session.get("klient_rola")
+        rola=session.get("klient_rola"),
+        priezvisko=session.get("klient_priezvisko")
     )
 
 def vyzaduje_prihlasenie():
@@ -450,6 +451,104 @@ def zmaz_klienta_web(id_klienta):
         print("Chyba pri mazaní klienta:", e)
 
     return redirect(url_for("klienti_prehlad"))
+
+@app.route("/upravit_klienta/<int:id_klienta>", methods=["GET", "POST"])
+def upravit_klienta_web(id_klienta):
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM klient WHERE id = %s", (id_klienta,))
+    k = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if k is None:
+        return "Klient neexistuje.", 404
+
+    chyba = None
+    sprava = None
+
+    if request.method == "POST":
+        meno = request.form.get("meno", "").strip()
+        priezvisko = request.form.get("priezvisko", "").strip()
+        email = request.form.get("email", "").strip()
+        heslo = request.form.get("heslo", "").strip()
+        rola = request.form.get("rola", "MAJITEL").strip()
+
+        if not meno or not priezvisko or not email:
+            chyba = "Meno, priezvisko a email sú povinné."
+        else:
+            try:
+                conn = get_connection()
+                cursor = conn.cursor()
+                if heslo:
+                    sql = """
+                        UPDATE klient
+                        SET meno = %s, priezvisko = %s, email = %s,
+                            heslo = %s, rola = %s
+                        WHERE id = %s
+                    """
+                    cursor.execute(sql, (meno, priezvisko, email, heslo, rola, id_klienta))
+                else:
+                    sql = """
+                        UPDATE klient
+                        SET meno = %s, priezvisko = %s, email = %s,
+                            rola = %s
+                        WHERE id = %s
+                    """
+                    cursor.execute(sql, (meno, priezvisko, email, rola, id_klienta))
+                conn.commit()
+                cursor.close()
+                conn.close()
+                sprava = "Údaje klienta boli upravené."
+            except Exception as e:
+                chyba = f"Chyba pri úprave klienta: {e}"
+
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM klient WHERE id = %s", (id_klienta,))
+            k = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+    return render_template("upravit_klienta.html", k=k, chyba=chyba, sprava=sprava)
+
+@app.route("/upravit_ucet/<int:cislo_uctu>", methods=["GET", "POST"])
+def upravit_ucet_web(cislo_uctu):
+    if not vyzaduje_operatora():
+        return redirect(url_for("login"))
+
+    u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+    if u is None:
+        return "Účet neexistuje.", 404
+
+    chyba = None
+    sprava = None
+
+    if request.method == "POST":
+        try:
+            zostatok = float(request.form.get("zostatok", u.zostatok))
+            urok = float(request.form.get("urok", u.urok))
+            typ = request.form.get("typ", u.typ)
+            limit = request.form.get("limit_precerpania", "")
+            urok_m = request.form.get("urok_v_minuse", "")
+
+            u.zostatok = zostatok
+            u.urok = urok
+            u.typ = typ
+            u.limit_precerpania = float(limit) if limit else None
+            u.urok_v_minuse = float(urok_m) if urok_m else None
+
+            u.uloz_do_db()
+            sprava = "Údaje účtu boli upravené."
+        except Exception as e:
+            chyba = f"Chyba pri úprave účtu: {e}"
+
+        u = Ucet.nacitaj_podla_cisla(cislo_uctu)
+
+    return render_template("upravit_ucet.html", u=u, chyba=chyba, sprava=sprava)
 
 if __name__ == "__main__":
     app.run(debug=True)

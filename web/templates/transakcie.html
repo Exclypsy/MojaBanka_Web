@@ -29,24 +29,20 @@
 <table class="table table-striped table-hover align-middle">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Číslo účtu</th>
             <th>Majiteľ</th>
             <th>Typ operácie</th>
             <th>Suma</th>
-            <th>Popis</th>
             <th>Dátum a čas</th>
         </tr>
     </thead>
     <tbody>
         {% for t in transakcie %}
         <tr>
-            <td>{{ t.id }}</td>
             <td>{{ t.cislo_uctu }}</td>
             <td>{{ t.meno }} {{ t.priezvisko }}</td>
             <td>{{ t.typ_operacie }}</td>
             <td>{{ t.suma }}</td>
-            <td>{{ t.popis }}</td>
             <td>{{ t.datum_cas }}</td>
         </tr>
         {% endfor %}

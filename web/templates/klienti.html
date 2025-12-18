@@ -29,18 +29,23 @@
                         {% for u in k.ucty %}
                             <li>
                                 {{ u.cislo_uctu }} ({{ u.typ }}, zostatok {{ u.zostatok }})
-                                – <a href="{{ url_for('detail_uctu', cislo_uctu=u.cislo_uctu) }}">detail</a>
                             </li>
                         {% endfor %}
                     </ul>
                 {% endif %}
             </td>
             <td>
+                <a href="{{ url_for('upravit_klienta_web', id_klienta=k.id) }}"
+                   class="btn btn-sm btn-outline-secondary mb-1">
+                    Upraviť
+                </a>
                 <form method="post" action="{{ url_for('zmaz_klienta_web', id_klienta=k.id) }}"
+                      class="d-inline"
                       onsubmit="return confirm('Naozaj zmazať klienta ID {{ k.id }} a jeho účty?');">
                     <button type="submit" class="btn btn-sm btn-outline-danger">Zmazať</button>
                 </form>
             </td>
+
         </tr>
     {% endfor %}
     </tbody>

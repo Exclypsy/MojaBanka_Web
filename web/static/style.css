@@ -14,10 +14,27 @@ h1, h2, h3 {
 
 a {
     color: #8e24aa;
+    text-decoration: none;
 }
+
 a:hover {
     color: #4a148c;
+    text-decoration: underline; /* alebo 'none', ak nechceš ani pri hoveri */
 }
+
+/* Ak nechceš podčiarknutie ani pri hoveri nikde: */
+.table a,
+.card a,
+nav a {
+    text-decoration: none;
+}
+
+.table a:hover,
+.card a:hover,
+nav a:hover {
+    text-decoration: none; /* necháš len zmenu farby */
+}
+
 
 form .form-label {
     font-weight: 500;

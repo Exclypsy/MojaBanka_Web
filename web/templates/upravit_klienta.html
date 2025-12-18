@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Upraviť klienta{% endblock %}
+{% block content %}
+<h1 class="mb-3 text-center">Upraviť klienta ID {{ k.id }}</h1>
+
+{% if chyba %}
+    <div class="alert-error">{{ chyba }}</div>
+{% endif %}
+{% if sprava %}
+    <div class="alert-success-custom">{{ sprava }}</div>
+{% endif %}
+
+<form method="post" class="mx-auto" style="max-width: 500px;">
+    <div class="mb-3">
+        <label class="form-label">Meno</label>
+        <input class="form-control" type="text" name="meno"
+               value="{{ k.meno }}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Priezvisko</label>
+        <input class="form-control" type="text" name="priezvisko"
+               value="{{ k.priezvisko }}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" type="email" name="email"
+               value="{{ k.email }}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Heslo (ponechaj prázdne, ak nechceš meniť)</label>
+        <input class="form-control" type="password" name="heslo">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Rola</label>
+        <select class="form-select" name="rola">
+            <option value="MAJITEL" {% if k.rola == 'MAJITEL' %}selected{% endif %}>Majiteľ</option>
+            <option value="OPERATOR" {% if k.rola == 'OPERATOR' %}selected{% endif %}>Operátor</option>
+        </select>
+    </div>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary px-4">Uložiť zmeny</button>
+    </div>
+</form>
+
+<div class="mt-3 text-center">
+    <a href="{{ url_for('klienti_prehlad') }}" class="btn btn-outline-secondary">
+        Späť na zoznam klientov
+    </a>
+</div>
+{% endblock %}
