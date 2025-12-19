@@ -155,11 +155,9 @@ def klienti_prehlad():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # klienti
     cursor.execute("SELECT id, meno, priezvisko, email, rola FROM klient ORDER BY id")
     klienti = cursor.fetchall()
 
-    # účty
     cursor.execute("""
         SELECT cislo_uctu, id_majitela, zostatok, typ
         FROM ucet
@@ -389,6 +387,7 @@ def uroky_operator():
                         chyba = "Účet s týmto číslom neexistuje."
                     else:
                         u.zapocitaj_urok()
+                        zaloguj_audit("ZAPOCITANIE UROKU", f"číslo účtu = {u.cislo_uctu}")
                         sprava = f"Úrok bol započítaný na účte {cislo_uctu}."
             else:
                 conn = get_connection()
@@ -428,6 +427,7 @@ def zmaz_ucet_web(cislo_uctu):
         conn.commit()
         cursor.close()
         conn.close()
+        zaloguj_audit("ZMAZANIE UCTU", f"číslo účtu = {cislo_uctu}")
         sprava = f"Účet {cislo_uctu} bol zmazaný."
     except Exception as e:
         sprava = f"Chyba pri mazaní účtu: {e}"
@@ -445,6 +445,7 @@ def zmaz_klienta_web(id_klienta):
 
         cursor.execute("DELETE FROM ucet WHERE id_majitela = %s", (id_klienta,))
         cursor.execute("DELETE FROM klient WHERE id = %s", (id_klienta,))
+        zaloguj_audit("ZMAZANIE KLIENTA", f"klient id={id_klienta}")
 
         conn.commit()
         cursor.close()
@@ -501,7 +502,7 @@ def upravit_klienta_web(id_klienta):
                         WHERE id = %s
                     """
                     cursor.execute(sql, (meno, priezvisko, email, rola, id_klienta))
-                zaloguj_audit("UPRAVA_KLIENTA", f"ID={id_klienta}, email={email}")
+                zaloguj_audit("UPRAVA KLIENTA", f"ID={id_klienta}, email={email}")
                 conn.commit()
                 cursor.close()
                 conn.close()
@@ -545,7 +546,7 @@ def upravit_ucet_web(cislo_uctu):
             u.urok_v_minuse = float(urok_m) if urok_m else None
 
             u.uloz_do_db()
-            zaloguj_audit("UPRAVA_UCTU", f"cislo_uctu={u.cislo_uctu}")
+            zaloguj_audit("UPRAVA UCTU", f"cislo_uctu={u.cislo_uctu}")
             sprava = "Údaje účtu boli upravené."
         except Exception as e:
             chyba = f"Chyba pri úprave účtu: {e}"
