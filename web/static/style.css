@@ -6,7 +6,6 @@ body {
     background: linear-gradient(90deg, #5c6bc0, #8e24aa);
 }
 
-/* Nadpisy a texty */
 h1, h2, h3 {
     color: #4a148c;
     margin-bottom: 1rem;
@@ -19,10 +18,9 @@ a {
 
 a:hover {
     color: #4a148c;
-    text-decoration: underline; /* alebo 'none', ak nechceš ani pri hoveri */
+    text-decoration: underline;
 }
 
-/* Ak nechceš podčiarknutie ani pri hoveri nikde: */
 .table a,
 .card a,
 nav a {
@@ -32,7 +30,7 @@ nav a {
 .table a:hover,
 .card a:hover,
 nav a:hover {
-    text-decoration: none; /* necháš len zmenu farby */
+    text-decoration: none;
 }
 
 
@@ -58,8 +56,6 @@ textarea:focus {
     box-shadow: 0 0 0 0.15rem rgba(142, 36, 170, 0.25);
 }
 
-/* Tlačidlá – fialovo-ružové */
-
 .btn-primary {
     background: linear-gradient(90deg, #5c6bc0, #8e24aa);
     border: none;
@@ -77,7 +73,6 @@ textarea:focus {
     color: #fff;
 }
 
-/* Chybové a úspešné správy */
 
 .alert-error {
     background-color: #ffebee;
@@ -95,8 +90,6 @@ textarea:focus {
     margin-bottom: 0.75rem;
 }
 
-/* Tabuľky */
-
 table {
     font-size: 0.9rem;
 }
@@ -111,8 +104,6 @@ table thead th {
 table tbody tr:nth-child(even) {
     background-color: #faf5ff;
 }
-
-/* Menšie medzery medzi prvkami na stránkach */
 
 .card-body {
     padding: 1.25rem 1.5rem;

@@ -6,8 +6,8 @@ class Klient:
         self.meno = meno
         self.priezvisko = priezvisko
         self.email = email
-        self.heslo = heslo      # neskôr spravíme hash
-        self.rola = rola        # 'MAJITEL' alebo 'OPERATOR'
+        self.heslo = heslo
+        self.rola = rola
 
     def uloz_do_db(self):
         conn = get_connection()
